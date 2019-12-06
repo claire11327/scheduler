@@ -1,3 +1,5 @@
+#include <ucontext.h>
+
 #ifndef TYPEDEFINE_H
 #define TYPEDEFINE_H
 
@@ -53,5 +55,17 @@ typedef struct
 
 /*********** resource configuration type definition **********************/
 typedef uint8 resource_type;
+
+
+/*********** task queue type definition **********************/
+typedef struct
+{
+    task_const_type taskData;	/* store activated task data*/
+    ucontext_t task_ucontext;   /* record the context of task */
+    unsigned char now_priority;  /* if get/release resource, change */
+    int occupied_res;		/* point to resource occupied by this task*/
+    int state; 			/* 0: running 1:ready 2:suspend 3:preempt */
+} task_queue_type;
+//typedef struct task_queue task_queue_type;
 
 #endif /* #ifndef TYPEDEFINE_H */
