@@ -42,10 +42,6 @@ int main()
             taskQ[i].task_ucontext.uc_stack.ss_size = STACKSIZE;
             taskQ[i].task_ucontext.uc_stack.ss_flags = 0;
             makecontext(&(taskQ[i].task_ucontext),task_const[i].entry, 0);
-            //printf("TASKS %d   priority :%d\n",i,taskQ[i].taskData.entry);
-            //printf("          priority :%d\n",task_const[i].entry);
-            //printf("          id       :%d\n",task_const[i].id);
-            printf("        size       :%d\n",sizeof(taskQ[i].task_ucontext));
         }
     }
 
@@ -61,7 +57,6 @@ int main()
         taskQ[auto_start_tasks_list[i]].state = 1;
         queue_size++;
     }
-    //printf("after init resource handle\n");
     getcontext(&main_ctx);
     while (1)
     {
@@ -69,14 +64,13 @@ int main()
         unsigned char phigh = 0;
         for(i = 0; i < TASKS_COUNT; i++)
         {
-            if(taskQ[i].state == 1&& phigh < taskQ[i].now_priority)
+            if(taskQ[i].state == 1&& phigh <= taskQ[i].now_priority)
             {
+                printf("task[%d]_state:%u\n",i,taskQ[i].state);
                 phigh = taskQ[i].taskData.static_priority;
                 func = i;
             }
         }
-        printf("task[1]_state:%u\n",taskQ[i].now_priority);
-        printf("after scheduler\n");
         printf("phigh: %u\n",phigh);
         int x = 0;
         scanf("%d\n",&x);
@@ -84,13 +78,15 @@ int main()
         {
             if(running_task_id != func)
             {
-                taskQ[running_task_id].state = 1;
                 taskQ[func].state = 0;
+                running_task_id = func;
                 swapcontext(&main_ctx,&(taskQ[func].task_ucontext));
                 printf("in sch swap back\n");
+
             }
             else
             {
+                running_task_id = func;
                 swapcontext(&main_ctx,&(taskQ[func].task_ucontext));
             }
         }
