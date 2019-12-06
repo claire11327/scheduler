@@ -65,6 +65,8 @@ typedef struct
     unsigned char now_priority;  /* if get/release resource, change */
     int occupied_res;		/* point to resource occupied by this task*/
     int state; 			/* 0: running 1:ready 2:suspend 3:preempt */
+    int turn;
+    int act_times;
 } task_queue_type;
 //typedef struct task_queue task_queue_type;
 

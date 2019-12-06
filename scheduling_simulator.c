@@ -14,16 +14,16 @@ task_queue_type taskQ[TASKS_COUNT];
 char task_stack[TASKS_COUNT][STACKSIZE];
 unsigned char resource_handle[RESOURCES_COUNT];
 int queue_size = 0;
-
 int running_task_id = -1;
+
 
 int init = -1;
 
 int main()
 {
     int i = 0;
+    int turn = 0;
 
-    printf("progkrk\n");
     if(init == -1)
     {
         init = 0;
@@ -33,6 +33,8 @@ int main()
             taskQ[i].now_priority = task_const[i].static_priority;
             taskQ[i].occupied_res = 0;
             taskQ[i].state = 2;
+            taskQ[i].turn = TASKS_COUNT+1;
+            taskQ[i].act_times = 0;
             if(getcontext(&(taskQ[i].task_ucontext))== -1 &&
                     sizeof(taskQ[i].task_ucontext.uc_stack.ss_size) != 0)
                 perror("getcontext failure: ");
@@ -55,33 +57,42 @@ int main()
     for(i = 0; i < autolist_size; i++)
     {
         taskQ[auto_start_tasks_list[i]].state = 1;
+        taskQ[auto_start_tasks_list[i]].act_times = 1;
         queue_size++;
     }
     getcontext(&main_ctx);
     while (1)
     {
-        int func = -1;
+        int func = 0;
         unsigned char phigh = 0;
         for(i = 0; i < TASKS_COUNT; i++)
         {
-            if(taskQ[i].state == 1&& phigh <= taskQ[i].now_priority)
+            if(taskQ[i].state == 1)
             {
-                printf("task[%d]_state:%u\n",i,taskQ[i].state);
-                phigh = taskQ[i].taskData.static_priority;
-                func = i;
+                if(taskQ[i].turn > TASKS_COUNT)
+                {
+                    taskQ[i].turn = turn;
+                    turn++;
+                }
+                if(phigh < taskQ[i].now_priority ||  (phigh == taskQ[i].now_priority && taskQ[func].turn > taskQ[i].turn ))
+                {
+                    phigh = taskQ[i].now_priority;
+                    func = i;
+                }
             }
         }
-        printf("phigh: %u\n",phigh);
-        int x = 0;
-        scanf("%d\n",&x);
         if(queue_size != 0)
         {
+            if(taskQ[func].act_times < 0 )
+            {
+                taskQ[func].act_times += 1;
+                makecontext(&(taskQ[func].task_ucontext),task_const[func].entry, 0);
+            }
             if(running_task_id != func)
             {
                 taskQ[func].state = 0;
                 running_task_id = func;
                 swapcontext(&main_ctx,&(taskQ[func].task_ucontext));
-                printf("in sch swap back\n");
 
             }
             else
@@ -89,6 +100,7 @@ int main()
                 running_task_id = func;
                 swapcontext(&main_ctx,&(taskQ[func].task_ucontext));
             }
+
         }
         else
             break;
