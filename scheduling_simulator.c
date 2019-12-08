@@ -15,6 +15,7 @@ char task_stack[TASKS_COUNT][STACKSIZE];
 unsigned char resource_handle[RESOURCES_COUNT];
 int queue_size = 0;
 int running_task_id = -1;
+int turn = 0;
 
 
 int init = -1;
@@ -22,7 +23,6 @@ int init = -1;
 int main()
 {
     int i = 0;
-    int turn = 0;
 
     if(init == -1)
     {

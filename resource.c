@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "resource.h"
 #ifndef SCHEDULING_SIMULATOR_H
 #define SCHEDULING_SIMULATOR_H
