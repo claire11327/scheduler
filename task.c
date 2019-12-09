@@ -35,15 +35,15 @@ status_type terminate_task(void)
         result = STATUS_OK;
         taskQ[running_task_id].state = 2;
         taskQ[running_task_id].act_times -= 1;
-        taskQ[running_task_id].turn = TASKS_COUNT+1;
         int i = 0;
         for(i = 0; i < TASKS_COUNT; i++)
         {
-            if(taskQ[i].state == 1)
+            if(taskQ[i].state == 1 && taskQ[i].turn > taskQ[running_task_id].turn)
             {
                 taskQ[i].turn -= 1;
             }
         }
+        taskQ[running_task_id].turn = TASKS_COUNT+1;
         turn--;
 
     }
