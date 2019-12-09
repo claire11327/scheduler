@@ -11,7 +11,10 @@ status_type get_resource(resource_type id)
     {
         resource_handle[id] = running_task_id;
         taskQ[running_task_id].occupied_res += 1;
-        taskQ[running_task_id].now_priority = resources_priority[id];
+        if(taskQ[running_task_id].now_priority <= resources_priority[id])
+        {
+            taskQ[running_task_id].now_priority = resources_priority[id];
+        }
 
         taskQ[running_task_id].state = 1;
 
@@ -37,8 +40,21 @@ status_type release_resource(resource_type id)
     {
         resource_handle[id] = 0;
         taskQ[running_task_id].occupied_res -= 1;
-        taskQ[running_task_id].now_priority = task_const[running_task_id].static_priority;
-
+        if(taskQ[running_task_id].occupied_res > 0)
+        {
+            int i = 0;
+            for(i = 0; i< RESOURCES_COUNT; i++)
+            {
+                if(resource_handle[i] == running_task_id && taskQ[running_task_id].taskData.static_priority <= resources_priority[i])
+                {
+                    taskQ[running_task_id].now_priority = resources_priority[i];
+                }
+            }
+        }
+        else
+        {
+            taskQ[running_task_id].now_priority = task_const[running_task_id].static_priority;
+        }
         taskQ[running_task_id].state = 1;
 
         if(swapcontext(&(taskQ[running_task_id].task_ucontext),&main_ctx) == -1)
